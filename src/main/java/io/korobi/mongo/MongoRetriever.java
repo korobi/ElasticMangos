@@ -13,7 +13,6 @@ import io.korobi.processor.RunnableProcessor;
 import org.bson.Document;
 
 import javax.inject.Inject;
-import javax.print.Doc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -48,7 +47,7 @@ public class MongoRetriever {
 
         List<Document> currentBatch;
         MongoCursor<Document> cursor = collection.find().iterator();
-
+        logger.info("Done with that");
         while (!(currentBatch = buildBatch(cursor)).isEmpty()) {
             // great! We have a bunch of documents in RAM now :D
             CountDownLatch latch = new CountDownLatch(opts.getThreadCap());
@@ -60,7 +59,9 @@ public class MongoRetriever {
                 thread.start();
                 logger.info(String.format("Spawned thread %d", threadNumber));
             }
+
             logger.info("Awaiting current batch end...");
+
             try {
                 latch.await();
             } catch (InterruptedException e) {
@@ -73,6 +74,7 @@ public class MongoRetriever {
     private List<Document> buildBatch(MongoCursor<Document> cursor) {
         List<Document> currentBatch = new ArrayList<Document>(opts.getBatchSize());
         while (cursor.hasNext()) {
+            logger.fine("ping");
             currentBatch.add(cursor.next()); // yield return cursor.next() :(
         }
         return currentBatch;
