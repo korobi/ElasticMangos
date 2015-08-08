@@ -61,5 +61,10 @@
             <artifactId>guice</artifactId>
             <version>4.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>1.7.1</version>
+        </dependency>
     </dependencies>
 </project>
