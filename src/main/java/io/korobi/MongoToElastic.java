@@ -7,6 +7,7 @@ import io.korobi.mongo.MongoRetriever;
 import io.korobi.opts.CmdLineOptions;
 import io.korobi.opts.IOptions;
 import io.korobi.opts.OptionsModule;
+import io.korobi.processor.ProcessorModule;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -42,7 +43,7 @@ public class MongoToElastic {
     }
 
     private void setupInjector(IOptions opts) {
-        this.injector = Guice.createInjector(new MongoModule(), new OptionsModule(opts));
+        this.injector = Guice.createInjector(new ProcessorModule(), new MongoModule(), new OptionsModule(opts));
     }
 
     public static void main(String[] args) {

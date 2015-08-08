@@ -2,8 +2,11 @@ package io.korobi.opts;
 
 public interface IOptions {
 
-    public String getMongoServerHost();
-    public int getMongoServerPort();
-
+    String getMongoServerHost();
+    int getMongoServerPort();
     String getMongoDatabase();
+
+    int getBatchSize();
+    int getThreadCap();
+
 }

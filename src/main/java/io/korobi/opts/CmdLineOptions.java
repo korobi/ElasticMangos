@@ -13,6 +13,12 @@ public class CmdLineOptions implements IOptions {
     @Option(name = "--mongo-db", usage = "Sets the name of the database to use.", required = true)
     private String mongoDb;
 
+    @Option(name = "--batch-size", usage = "How many documents we grab out of the database at once.")
+    private int batchSize = 1000;
+
+    @Option(name = "--thread-cap", usage = "Maximum number of threads we should have running at the same time.")
+    private int threadCap = 4;
+
     public String getMongoServerHost() {
         return mongoHost;
     }
@@ -24,4 +30,13 @@ public class CmdLineOptions implements IOptions {
     public String getMongoDatabase() {
         return mongoDb;
     }
+
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    public int getThreadCap() {
+        return threadCap;
+    }
+
 }
