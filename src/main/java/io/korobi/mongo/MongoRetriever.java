@@ -1,7 +1,5 @@
 package io.korobi.mongo;
 
-import com.mongodb.DBCursor;
-import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -10,6 +8,7 @@ import io.korobi.exceptions.UserIsAtFaultException;
 import io.korobi.opts.IOptions;
 import io.korobi.processor.IDocumentProcessor;
 import io.korobi.processor.RunnableProcessor;
+import io.korobi.utils.NumberUtil;
 import org.bson.Document;
 
 import javax.inject.Inject;
@@ -33,7 +32,7 @@ public class MongoRetriever {
         this.logger = logger;
         this.processor = processor;
         double itemsPerThread = opts.getBatchSize() / (double) opts.getThreadCap();
-        if (itemsPerThread != Math.ceil(itemsPerThread)) {
+        if (NumberUtil.isValueFractional(itemsPerThread)) {
             throw new UserIsAtFaultException("Disallowing poor thread-related option choice.");
         }
         this.itemsPerThread = (int) itemsPerThread;
