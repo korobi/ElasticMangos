@@ -2,6 +2,7 @@ package io.korobi;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.mongodb.MongoClient;
 import io.korobi.mongo.MongoModule;
 import io.korobi.mongo.MongoRetriever;
 import io.korobi.opts.CmdLineOptions;
@@ -23,6 +24,21 @@ public class MongoToElastic {
 
         setupInjector(opts);
         beginProcessing();
+        addShutdownHook();
+        cleanupClients();
+    }
+
+    private void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                cleanupClients();
+            }
+        });
+    }
+
+    private void cleanupClients() {
+        MongoClient client = injector.getInstance(MongoClient.class);
+        client.close();
     }
 
     private void beginProcessing() {
