@@ -46,7 +46,9 @@ public class MongoRetriever {
         logger.info("There are " + String.valueOf(collection.count()) + " chats!");
 
         List<Document> currentBatch;
-        MongoCursor<Document> cursor = collection.find().iterator();
+        FindIterable<Document> iterable = collection.find();
+        iterable.batchSize(opts.getBatchSize());
+        MongoCursor<Document> cursor= iterable.iterator();
         logger.info("Done with that");
         while (!(currentBatch = buildBatch(cursor)).isEmpty()) {
             // great! We have a bunch of documents in RAM now :D
