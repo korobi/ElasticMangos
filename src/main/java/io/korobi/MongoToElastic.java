@@ -46,7 +46,7 @@ public class MongoToElastic {
         injector.getInstance(MongoRetriever.class);
     }
 
-    private CmdLineOptions handleCommandLineArgs(String[] args) {
+    public CmdLineOptions handleCommandLineArgs(String[] args) {
         CmdLineOptions bean = new CmdLineOptions();
         CmdLineParser parser = new CmdLineParser(bean);
         try {
