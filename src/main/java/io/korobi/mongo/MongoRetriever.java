@@ -74,7 +74,9 @@ public class MongoRetriever {
     }
 
     private List<Document> buildBatch(MongoCursor<Document> cursor) {
+        logger.info("Hello from buildBatch!");
         List<Document> currentBatch = new ArrayList<Document>(opts.getBatchSize());
+        logger.info("Instantiated ArrayList :)");
         while (cursor.hasNext()) {
             logger.fine("ping");
             currentBatch.add(cursor.next()); // yield return cursor.next() :(
