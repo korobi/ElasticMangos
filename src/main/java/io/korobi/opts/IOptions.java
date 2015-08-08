@@ -11,4 +11,6 @@ public interface IOptions {
 
     String getElasticSearchHost();
     int getElasticSearchPort();
+
+    boolean getWillReconfigureIndexes();
 }

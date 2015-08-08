@@ -19,11 +19,11 @@ import java.util.logging.Logger;
 
 public class MongoRetriever {
 
-    private final MongoDatabase database;
+    private MongoDatabase database;
     private IOptions opts;
-    private final Logger logger;
+    private Logger logger;
     private IDocumentProcessor processor;
-    private final int itemsPerThread;
+    private int itemsPerThread;
 
     @Inject
     public MongoRetriever(MongoDatabase database, IOptions opts, Logger logger, IDocumentProcessor processor) {
@@ -31,13 +31,19 @@ public class MongoRetriever {
         this.opts = opts;
         this.logger = logger;
         this.processor = processor;
+
+        checkUserThreadParameters();
+
+        // MongoClient & MongoDatabase are thread safe :)
+        processData();
+    }
+
+    private void checkUserThreadParameters() {
         double itemsPerThread = opts.getBatchSize() / (double) opts.getThreadCap();
         if (NumberUtil.isValueFractional(itemsPerThread)) {
             throw new UserIsAtFaultException("Disallowing poor thread-related option choice.");
         }
         this.itemsPerThread = (int) itemsPerThread;
-        // MongoClient & MongoDatabase are thread safe :)
-        processData();
     }
 
     private void processData() {
@@ -52,10 +58,10 @@ public class MongoRetriever {
         while (!(currentBatch = buildBatch(cursor)).isEmpty()) {
             // great! We have a bunch of documents in RAM now :D
             CountDownLatch latch = new CountDownLatch(opts.getThreadCap());
-            logger.info("Got a new batch of" + currentBatch.size() + " documents");
+            logger.info(String.format("Got a new batch of %d documents", currentBatch.size()));
             for (int threadNumber = 1; threadNumber <= opts.getThreadCap(); threadNumber++) {
                 int fromIndex = (threadNumber - 1) * itemsPerThread;
-                List<Document> forThread = currentBatch.subList(fromIndex, fromIndex + itemsPerThread);
+                List<Document> forThread = currentBatch.subList(fromIndex, fromIndex + itemsPerThread - 1);
                 Thread thread = new Thread(new RunnableProcessor(forThread, processor, latch));
                 thread.start();
                 logger.info(String.format("Spawned thread %d", threadNumber));

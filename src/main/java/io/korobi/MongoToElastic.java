@@ -4,6 +4,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.mongodb.MongoClient;
 import io.korobi.elasticsearch.ElasticSearchModule;
+import io.korobi.elasticsearch.IndexInitialiser;
 import io.korobi.mongo.MongoModule;
 import io.korobi.mongo.MongoRetriever;
 import io.korobi.opts.CmdLineOptions;
@@ -24,9 +25,18 @@ public class MongoToElastic {
         }
 
         setupInjector(opts);
+        
+        if (opts.getWillReconfigureIndexes()) {
+            reconfigureIndexes();
+        }
+        
         beginProcessing();
         addShutdownHook();
         cleanupClients();
+    }
+
+    private void reconfigureIndexes() {
+        injector.getInstance(IndexInitialiser.class).initialise();
     }
 
     private void addShutdownHook() {

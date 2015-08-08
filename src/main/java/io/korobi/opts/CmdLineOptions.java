@@ -25,6 +25,9 @@ public class CmdLineOptions implements IOptions {
     @Option(name = "--es-port", usage = "ElasticSearch port for transport client.")
     private int esPort = 9300;
 
+    @Option(name = "--reconfigure-indexes", usage = "Whether to drop and reconfigure all indexes.")
+    private boolean reconfigureIndexes = false;
+
     public String getMongoServerHost() {
         return mongoHost;
     }
@@ -51,6 +54,10 @@ public class CmdLineOptions implements IOptions {
 
     public int getElasticSearchPort() {
         return esPort;
+    }
+
+    public boolean getWillReconfigureIndexes() {
+        return reconfigureIndexes;
     }
 
 }
