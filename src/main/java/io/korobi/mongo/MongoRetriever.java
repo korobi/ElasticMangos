@@ -48,7 +48,7 @@ public class MongoRetriever {
         List<Document> currentBatch;
         FindIterable<Document> iterable = collection.find();
         iterable.batchSize(opts.getBatchSize());
-        MongoCursor<Document> cursor= iterable.iterator();
+        MongoCursor<Document> cursor = iterable.iterator();
         logger.info("Done with that");
         while (!(currentBatch = buildBatch(cursor)).isEmpty()) {
             // great! We have a bunch of documents in RAM now :D
@@ -77,8 +77,8 @@ public class MongoRetriever {
         logger.info("Hello from buildBatch!");
         List<Document> currentBatch = new ArrayList<Document>(opts.getBatchSize());
         logger.info("Instantiated ArrayList :)");
-        while (cursor.hasNext()) {
-            logger.fine("ping");
+
+        while (cursor.hasNext() && currentBatch.size() < opts.getBatchSize()) {
             currentBatch.add(cursor.next()); // yield return cursor.next() :(
         }
         return currentBatch;
