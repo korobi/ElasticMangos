@@ -9,4 +9,6 @@ public interface IOptions {
     int getBatchSize();
     int getThreadCap();
 
+    String getElasticSearchHost();
+    int getElasticSearchPort();
 }

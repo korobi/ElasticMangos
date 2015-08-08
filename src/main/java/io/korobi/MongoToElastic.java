@@ -3,6 +3,7 @@ package io.korobi;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.mongodb.MongoClient;
+import io.korobi.elasticsearch.ElasticSearchModule;
 import io.korobi.mongo.MongoModule;
 import io.korobi.mongo.MongoRetriever;
 import io.korobi.opts.CmdLineOptions;
@@ -59,7 +60,9 @@ public class MongoToElastic {
     }
 
     private void setupInjector(IOptions opts) {
-        this.injector = Guice.createInjector(new ProcessorModule(), new MongoModule(), new OptionsModule(opts));
+        this.injector = Guice.createInjector(
+                new ElasticSearchModule(), new ProcessorModule(), new MongoModule(), new OptionsModule(opts)
+        );
     }
 
     public static void main(String[] args) {

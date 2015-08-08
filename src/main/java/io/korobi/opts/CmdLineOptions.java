@@ -19,6 +19,12 @@ public class CmdLineOptions implements IOptions {
     @Option(name = "--thread-cap", usage = "Maximum number of threads we should have running at the same time.")
     private int threadCap = 4;
 
+    @Option(name = "--es-host", usage = "ElasticSearch host for transport client.")
+    private String esHost = "127.0.0.1";
+
+    @Option(name = "--es-port", usage = "ElasticSearch port for transport client.")
+    private int esPort = 9300;
+
     public String getMongoServerHost() {
         return mongoHost;
     }
@@ -37,6 +43,14 @@ public class CmdLineOptions implements IOptions {
 
     public int getThreadCap() {
         return threadCap;
+    }
+
+    public String getElasticSearchHost() {
+        return esHost;
+    }
+
+    public int getElasticSearchPort() {
+        return esPort;
     }
 
 }
