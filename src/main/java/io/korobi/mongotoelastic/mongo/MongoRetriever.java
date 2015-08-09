@@ -39,22 +39,24 @@ public class MongoRetriever {
     public void processData() {
         MongoCollection<Document> collection = this.database.getCollection("chats");
         logger.info("There are " + String.valueOf(collection.count()) + " chats!");
-
+        int batches = (int) Math.ceil(collection.count() / (double) opts.getBatchSize());
         FindIterable<Document> iterable = collection.find();
         iterable.batchSize(this.opts.getBatchSize());
         MongoCursor<Document> cursor = iterable.iterator();
 
         List<Document> documents = new ArrayList<>(this.itemsPerThread);
         int current = 0;
+        int batchNo = 1;
         while(cursor.hasNext()) {
             if(current < this.itemsPerThread) {
                 ++current;
                 documents.add(cursor.next());
             } else {
-                logger.info(String.format("Got a new batch of %d documents", documents.size()));
+                logger.info(String.format("Got a new batch of %d documents. %d of %d batches.", documents.size(), batchNo, batches));
                 processBatch(documents);
                 documents = new ArrayList<>(this.itemsPerThread);
                 current = 0;
+                batchNo++;
             }
         }
         cursor.close();
