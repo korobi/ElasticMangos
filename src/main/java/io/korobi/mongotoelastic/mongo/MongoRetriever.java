@@ -53,7 +53,7 @@ public class MongoRetriever {
                 documents.add(cursor.next());
             } else {
                 logger.info(String.format("Got a new batch of %d documents. %d of %d batches.", documents.size(), batchNo, batches));
-                processBatch(documents);
+                processBatch(documents, batchNo);
                 documents = new ArrayList<>(this.itemsPerThread);
                 current = 0;
                 batchNo++;
@@ -63,19 +63,24 @@ public class MongoRetriever {
 
         if(!documents.isEmpty()) {
             logger.info("Last batch!");
-            processBatch(documents);
+            processBatch(documents, batchNo);
         }
 
         this.threadPool.shutdown();
         try {
-            this.threadPool.awaitTermination(0, TimeUnit.MILLISECONDS);
+            if(!this.threadPool.awaitTermination(0, TimeUnit.MILLISECONDS)) {
+                logger.warn("Thread pool did not terminate");
+            }
         } catch(InterruptedException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 
-    private void processBatch(List<Document> documents) {
-        this.threadPool.submit(() -> this.processor.run(documents));
+    private void processBatch(List<Document> documents, int batchNo) {
+        this.threadPool.submit(() -> {
+            logger.info("Handling batch %d.", batchNo);
+            this.processor.run(documents);
+        });
     }
 
 }
