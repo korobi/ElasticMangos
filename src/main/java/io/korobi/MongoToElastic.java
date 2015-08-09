@@ -12,15 +12,14 @@ import io.korobi.opts.CmdLineOptions;
 import io.korobi.opts.IOptions;
 import io.korobi.opts.OptionsModule;
 import io.korobi.processor.ProcessorModule;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.collect.ImmutableList;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
+
+import java.util.Scanner;
 
 public class MongoToElastic {
 
@@ -36,6 +35,8 @@ public class MongoToElastic {
         checkConnectedToEs();
         if (opts.getWillReconfigureIndexes()) {
             reconfigureIndexes();
+            System.out.println("Hit any key to continue...");
+            (new Scanner(System.in)).nextLine();
         }
         
         beginProcessing();

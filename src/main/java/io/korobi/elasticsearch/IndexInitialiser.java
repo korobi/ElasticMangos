@@ -38,7 +38,7 @@ public class IndexInitialiser {
             e.printStackTrace();
         }
 
-        // TODO
+        logger.info("Created index!");
         indices.create(createBuilder);
     }
 }
