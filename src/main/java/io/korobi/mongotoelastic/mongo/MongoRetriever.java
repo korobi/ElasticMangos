@@ -78,7 +78,7 @@ public class MongoRetriever {
 
     private void processBatch(List<Document> documents, int batchNo) {
         this.threadPool.submit(() -> {
-            logger.info("Handling batch %d.", batchNo);
+            logger.info(String.format("Handling batch %d.", batchNo));
             this.processor.run(documents);
         });
     }
