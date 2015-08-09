@@ -20,12 +20,13 @@ public class IndexInitialiser {
     }
 
     public void initialise() {
-        IndicesAdminClient indicies = esClient.admin().indices();
-        DeleteIndexRequestBuilder deleteBuilder = new DeleteIndexRequestBuilder(indicies, "chats");
-        indicies.delete(deleteBuilder.request());
+        IndicesAdminClient indices = esClient.admin().indices();
+        DeleteIndexRequestBuilder deleteBuilder = new DeleteIndexRequestBuilder(indices, "chats");
+        indices.delete(deleteBuilder.request());
         logger.info("Indexes removed.");
 
         CreateIndexRequest createBuilder = new CreateIndexRequest("chats");
-        indicies.create(createBuilder);
+        // TODO
+        indices.create(createBuilder);
     }
 }

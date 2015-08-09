@@ -5,12 +5,20 @@ import com.google.inject.Injector;
 import com.mongodb.MongoClient;
 import io.korobi.elasticsearch.ElasticSearchModule;
 import io.korobi.elasticsearch.IndexInitialiser;
+import io.korobi.exceptions.ConnectionException;
 import io.korobi.mongo.MongoModule;
 import io.korobi.mongo.MongoRetriever;
 import io.korobi.opts.CmdLineOptions;
 import io.korobi.opts.IOptions;
 import io.korobi.opts.OptionsModule;
 import io.korobi.processor.ProcessorModule;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.common.collect.ImmutableList;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -25,7 +33,7 @@ public class MongoToElastic {
         }
 
         setupInjector(opts);
-        
+        checkConnectedToEs();
         if (opts.getWillReconfigureIndexes()) {
             reconfigureIndexes();
         }
@@ -33,6 +41,16 @@ public class MongoToElastic {
         beginProcessing();
         addShutdownHook();
         cleanupClients();
+    }
+
+    private void checkConnectedToEs() {
+        TransportClient client = (TransportClient) injector.getInstance(Client.class);
+        ImmutableList<DiscoveryNode> nodes = client.connectedNodes();
+        if (nodes.isEmpty()) {
+            Exception e = new ConnectionException("Verify ES is running!");
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
 
     private void reconfigureIndexes() {
