@@ -34,6 +34,7 @@ public class MongoToElastic {
         }
 
         this.setupInjector(opts);
+        this.addShutdownHook();
         this.checkConnectedToEs();
         if (opts.getWillReconfigureIndexes()) {
             this.reconfigureIndexes();
@@ -43,7 +44,7 @@ public class MongoToElastic {
         this.injector.getInstance(KeyedChannelBlacklist.class);
 
         this.beginProcessing();
-        this.addShutdownHook();
+
         this.cleanupClients();
     }
 
