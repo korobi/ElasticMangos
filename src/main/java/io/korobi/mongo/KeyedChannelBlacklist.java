@@ -28,20 +28,21 @@ public class KeyedChannelBlacklist implements IChannelBlacklist {
         MongoCollection<Document> channels = database.getCollection("channels");
         FindIterable<Document> allChannels = channels.find();
         Stream<Document> stream = StreamSupport.stream(allChannels.spliterator(), false);
+        stream.filter(c -> c.containsKey("key") && c.get("key") != null);
+
         stream.collect(Collectors.groupingBy(
-            channel -> channel.getString("network"),
-            HashMap::new,
-            Collector.of(
-                HashSet::new, Set::add,
-                (left, right) -> {
-                    left.addAll(right);
-                    return left;
-                },
+                channel -> channel.getString("network"),
+                HashMap::new,
+                Collector.of(
+                        HashSet::new, Set::add,
+                        (left, right) -> {
+                            left.addAll(right);
+                            return left;
+                        },
                 Collections::unmodifiableSet
             )
         ));
 
-        stream.filter(c -> c.containsKey("key") && c.get("key") != null);
         System.out.println(stream.count());
         System.out.println(stream.findFirst().get().getString("channel"));
     }

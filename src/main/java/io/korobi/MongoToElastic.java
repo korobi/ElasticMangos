@@ -6,6 +6,7 @@ import com.mongodb.MongoClient;
 import io.korobi.elasticsearch.ElasticSearchModule;
 import io.korobi.elasticsearch.IndexInitialiser;
 import io.korobi.exceptions.ConnectionException;
+import io.korobi.mongo.KeyedChannelBlacklist;
 import io.korobi.mongo.MongoModule;
 import io.korobi.mongo.MongoRetriever;
 import io.korobi.opts.CmdLineOptions;
@@ -38,7 +39,9 @@ public class MongoToElastic {
             System.out.println("Hit any key to continue...");
             (new Scanner(System.in)).nextLine();
         }
-        
+        injector.getInstance(KeyedChannelBlacklist.class);
+        System.exit(-1);
+
         beginProcessing();
         addShutdownHook();
         cleanupClients();
