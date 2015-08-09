@@ -24,31 +24,28 @@ public class KeyedChannelBlacklist implements IChannelBlacklist {
     }
 
     private void createCache() {
-        Map<String, Set<String>> cache = new HashMap<>();
         MongoCollection<Document> channels = database.getCollection("channels");
         FindIterable<Document> allChannels = channels.find();
         Stream<Document> stream = StreamSupport.stream(allChannels.spliterator(), false);
-        cachedChannels = stream.filter(c -> c.containsKey("key") && c.get("key") != null)
-            .collect(
-                Collectors.groupingBy(
-                    channel -> channel.getString("network"),
-                    HashMap::new,
-                    Collector.<Document, Set<String>, Set<String>>of(
-                        HashSet::new, (s, d) -> s.add(d.getString("channel")),
-                        (left, right) -> {
-                            left.addAll(right);
-                            return left;
-                        },
-                        Collections::unmodifiableSet
-                    )
-                )
-            );
-
-        System.out.println(cachedChannels.size());
-        System.out.println(Arrays.toString(cachedChannels.entrySet().toArray()));
+        cachedChannels = stream
+                .filter(c -> c.containsKey("key") && c.get("key") != null)
+                .collect(
+                        Collectors.groupingBy(
+                                channel -> channel.getString("network"),
+                                HashMap::new,
+                                Collector.<Document, Set<String>, Set<String>>of(
+                                        HashSet::new, (s, d) -> s.add(d.getString("channel")),
+                                        (left, right) -> {
+                                            left.addAll(right);
+                                            return left;
+                                        },
+                                        Collections::unmodifiableSet
+                                )
+                        )
+                );
     }
 
     public boolean isBlacklisted(String channel, String network) {
-        return false;
+        return cachedChannels.getOrDefault(network, Collections.emptySet()).contains(channel);
     }
 }
