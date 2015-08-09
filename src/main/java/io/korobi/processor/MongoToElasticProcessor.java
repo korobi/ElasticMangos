@@ -51,7 +51,7 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
                             .field("date", date.getTime())
                     .endObject();
                 bulkRequest.add(esClient.prepareIndex("chats", "chat").setSource(docBuilder));
-                logger.info(doc.toJson());
+                logger.info(docBuilder.string());
             } catch (IOException e) {
                 e.printStackTrace();
             }
