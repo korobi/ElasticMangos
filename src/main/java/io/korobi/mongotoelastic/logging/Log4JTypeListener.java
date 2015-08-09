@@ -16,7 +16,6 @@ public class Log4JTypeListener implements TypeListener, ProvisionListener {
 
     @Override
     public <T> void hear(TypeLiteral<T> typeLiteral, TypeEncounter<T> typeEncounter) {
-        System.out.println("Call!");
         Class<?> clazz = typeLiteral.getRawType();
         while (clazz != null) {
             for (Field field : clazz.getDeclaredFields()) {
