@@ -46,9 +46,6 @@ public class MongoRetriever {
 
     public void processData() {
         MongoCollection<Document> collection = this.database.getCollection("chats");
-        if (logger == null) {
-            throw new RuntimeException("Logger was null :(");
-        }
         logger.info("There are " + String.valueOf(collection.count()) + " chats!");
 
         List<Document> currentBatch;
