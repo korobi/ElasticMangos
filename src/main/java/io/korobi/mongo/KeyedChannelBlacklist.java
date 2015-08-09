@@ -7,6 +7,7 @@ import org.bson.Document;
 
 import javax.inject.Inject;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -26,8 +27,19 @@ public class KeyedChannelBlacklist implements IChannelBlacklist {
         Map<String, Set<String>> cache = new HashMap<>();
         MongoCollection<Document> channels = database.getCollection("channels");
         FindIterable<Document> allChannels = channels.find();
-        Stream<Document> stream = StreamSupport.stream(allChannels.spliterator());
-        stream.collect(Collectors.groupingBy(channel -> channel.getString("network"), HashMap::new, Collectors.of(HashSet::new, Set::add, Set::addAll, Collections::unmodifiableSet));
+        Stream<Document> stream = StreamSupport.stream(allChannels.spliterator(), false);
+        stream.collect(Collectors.groupingBy(
+            channel -> channel.getString("network"),
+            HashMap::new,
+            Collector.of(
+                HashSet::new, Set::add,
+                (left, right) -> {
+                    left.addAll(right);
+                    return left;
+                },
+                Collections::unmodifiableSet
+            )
+        ));
 
         for (Document doc : allChannels) {
             if (doc.containsKey("key") && doc.get("key") != null) {
