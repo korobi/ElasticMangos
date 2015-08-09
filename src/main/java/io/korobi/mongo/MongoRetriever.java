@@ -59,9 +59,18 @@ public class MongoRetriever {
             // great! We have a bunch of documents in RAM now :D
             CountDownLatch latch = new CountDownLatch(opts.getThreadCap());
             logger.info(String.format("Got a new batch of %d documents", currentBatch.size()));
+            if (currentBatch.size() != opts.getBatchSize()) {
+                logger.info("Last batch!");
+            }
+
             for (int threadNumber = 1; threadNumber <= opts.getThreadCap(); threadNumber++) {
                 int fromIndex = (threadNumber - 1) * itemsPerThread;
-                List<Document> forThread = currentBatch.subList(fromIndex, fromIndex + itemsPerThread - 1);
+                int endIndex = fromIndex + itemsPerThread;
+                int lastIndexInBatch = currentBatch.size() - 1;
+                if (endIndex > lastIndexInBatch) {
+                    endIndex = lastIndexInBatch;
+                }
+                List<Document> forThread = currentBatch.subList(fromIndex, endIndex);
                 Thread thread = new Thread(new RunnableProcessor(forThread, processor, latch));
                 thread.start();
                 logger.info(String.format("Spawned thread %d", threadNumber));
