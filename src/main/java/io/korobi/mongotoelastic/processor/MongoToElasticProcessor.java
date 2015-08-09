@@ -1,5 +1,6 @@
 package io.korobi.mongotoelastic.processor;
 
+import com.mongodb.client.MongoCursor;
 import io.korobi.mongotoelastic.exception.ImportException;
 import io.korobi.mongotoelastic.logging.InjectLogger;
 import io.korobi.mongotoelastic.mongo.IChannelBlacklist;
@@ -14,9 +15,11 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MongoToElasticProcessor implements IDocumentProcessor {
+
+    private static final AtomicInteger batchNo = new AtomicInteger();
 
     @InjectLogger
     private Logger logger;
@@ -30,14 +33,22 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
     }
 
     @Override
-    public void run(List<Document> documents) {
+    public void run(MongoCursor<Document> documents, int bulkSize) {
         BulkRequestBuilder bulkRequest = this.esClient.prepareBulk();
+        Document doc;
 
-        for (Document doc : documents) {
+        synchronized(documents) {
+            doc = documents.tryNext();
+        }
+        int i = 0;
+        while(doc != null) {
             if (this.blacklist.isBlacklisted(doc.getString("network"), doc.getString("channel"))) {
+                synchronized(documents) {
+                    doc = documents.tryNext();
+                }
                 continue;
             }
-            
+
             try {
                 Date date = (Date) doc.get("date");
                 XContentBuilder docBuilder =
@@ -58,20 +69,39 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
                             .field("date", date.getTime())
                         .endObject();
                 bulkRequest.add(this.esClient.prepareIndex("chats", "chat").setSource(docBuilder));
+                ++i;
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e);
+            }
+
+            if(i >= bulkSize) {
+                processBulkRequest(bulkRequest);
+                i = 0;
+            }
+
+            synchronized(documents) {
+                doc = documents.tryNext();
             }
         }
+
+        processBulkRequest(bulkRequest);
+    }
+
+    private void processBulkRequest(BulkRequestBuilder bulkRequest) {
         if (bulkRequest.numberOfActions() == 0) {
             return;
         }
 
+        int currentNo = batchNo.incrementAndGet();
+        logger.info("Processing bulk request {}.", currentNo);
+
         BulkResponse bulkResponse = bulkRequest.execute().actionGet();
         if (bulkResponse.hasFailures()) {
-            logger.error("Bulk response failure! (this is bad) " + bulkResponse.getItems()[0].getFailureMessage());
+            logger.error("Bulk response failure! (this is bad) Request: {}, message: {}", currentNo, bulkResponse.getItems()[0].getFailureMessage());
             throw new ImportException(bulkResponse.getItems()[0].getFailureMessage());
         } else {
-            logger.info(String.format("%d docs were processed.", documents.size()));
+            logger.info("{} docs were processed by request {}.", bulkRequest.numberOfActions(), currentNo);
         }
     }
+
 }

@@ -1,11 +1,10 @@
 package io.korobi.mongotoelastic.processor;
 
+import com.mongodb.client.MongoCursor;
 import org.bson.Document;
-
-import java.util.List;
 
 @FunctionalInterface
 public interface IDocumentProcessor {
 
-    void run(List<Document> documents);
+    void run(MongoCursor<Document> documents, int bulkSize);
 }
