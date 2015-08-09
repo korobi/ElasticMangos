@@ -41,31 +41,9 @@ public class KeyedChannelBlacklist implements IChannelBlacklist {
             )
         ));
 
-        for (Document doc : allChannels) {
-            if (doc.containsKey("key") && doc.get("key") != null) {
-                createOrAppendForNetwork(doc.getString("network"), doc.getString("channel"), cache);
-            }
-        }
-    }
-
-    private <T> Stream<T> stream(Iterable<T> iterable) {
-        return StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(
-                        iterable.iterator(),
-                        Spliterator.ORDERED
-                ),
-                false
-        );
-    }
-
-    private void createOrAppendForNetwork(String network, String channel, Map<String, Set<String>> cache) {
-        if (cache.containsKey(network)) {
-            cache.get(network).add(channel);
-        } else {
-            HashSet<String> channelSet = new HashSet<>();
-            channelSet.add(channel);
-            cache.put(network, channelSet);
-        }
+        stream.filter(c -> c.containsKey("key") && c.get("key") != null);
+        System.out.println(stream.count());
+        System.out.println(stream.findFirst().get().getString("channel"));
     }
 
     public boolean isBlacklisted(String channel, String network) {
