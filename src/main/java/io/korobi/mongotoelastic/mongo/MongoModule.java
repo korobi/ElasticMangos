@@ -1,11 +1,11 @@
-package io.korobi.mongo;
+package io.korobi.mongotoelastic.mongo;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import io.korobi.opts.IOptions;
+import io.korobi.mongotoelastic.opt.IOptions;
 
 public class MongoModule extends AbstractModule {
 
@@ -20,7 +20,7 @@ public class MongoModule extends AbstractModule {
     @Provides
     @Singleton
     public MongoClient provideMongoClient(IOptions opts) {
-        return new MongoClient(opts.getMongoServerHost() , opts.getMongoServerPort());
+        return new MongoClient(opts.getMongoServerHost(), opts.getMongoServerPort());
     }
 
     @Provides

@@ -1,6 +1,6 @@
 package io.korobi;
 
-import io.korobi.utils.NumberUtil;
+import io.korobi.mongotoelastic.util.NumberUtil;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package io.korobi.exceptions;
+package io.korobi.mongotoelastic.exception;
 
 public class UserIsAtFaultException extends RuntimeException {
 

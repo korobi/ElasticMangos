@@ -1,4 +1,4 @@
-package io.korobi.processor;
+package io.korobi.mongotoelastic.processor;
 
 import org.bson.Document;
 
@@ -17,8 +17,9 @@ public class RunnableProcessor implements Runnable {
         this.latch = latch;
     }
 
+    @Override
     public void run() {
-        processor.run(documents);
-        latch.countDown();
+        this.processor.run(this.documents);
+        this.latch.countDown();
     }
 }
