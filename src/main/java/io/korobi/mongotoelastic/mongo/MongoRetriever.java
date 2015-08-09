@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import io.korobi.mongotoelastic.exception.UserIsAtFaultException;
+import io.korobi.mongotoelastic.logging.InjectLogger;
 import io.korobi.mongotoelastic.opt.IOptions;
 import io.korobi.mongotoelastic.processor.IDocumentProcessor;
 import io.korobi.mongotoelastic.processor.RunnableProcessor;
@@ -21,7 +22,8 @@ import javax.inject.Inject;
 
 public class MongoRetriever {
 
-    private static Logger logger = LogManager.getLogger();
+    @InjectLogger
+    private Logger logger;
     private MongoDatabase database;
     private IOptions opts;
     private IDocumentProcessor processor;
