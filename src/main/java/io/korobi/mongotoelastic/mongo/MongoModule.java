@@ -14,7 +14,7 @@ public class MongoModule extends AbstractModule {
 
     @Override
     protected void configure() {
-
+        bind(IChannelBlacklist.class).to(KeyedChannelBlacklist.class);
     }
 
     @Provides

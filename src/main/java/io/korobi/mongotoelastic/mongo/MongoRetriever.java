@@ -52,7 +52,6 @@ public class MongoRetriever {
         FindIterable<Document> iterable = collection.find();
         iterable.batchSize(this.opts.getBatchSize());
         MongoCursor<Document> cursor = iterable.iterator();
-        logger.info("Done with that");
         while (!(currentBatch = this.buildBatch(cursor)).isEmpty()) {
             // great! We have a bunch of documents in RAM now :D
             CountDownLatch latch = new CountDownLatch(this.opts.getThreadCap());
@@ -66,15 +65,13 @@ public class MongoRetriever {
                 int endIndex = fromIndex + this.itemsPerThread;
                 int lastIndexInBatch = currentBatch.size() - 1;
                 if (endIndex > lastIndexInBatch) {
-                    endIndex = lastIndexInBatch;
+                    endIndex = lastIndexInBatch; // this doesn't work :D
                 }
                 List<Document> forThread = currentBatch.subList(fromIndex, endIndex);
                 Thread thread = new Thread(new RunnableProcessor(forThread, this.processor, latch));
                 thread.start();
-                logger.info(String.format("Spawned thread %d", threadNumber));
             }
 
-            logger.info("Awaiting current batch end...");
 
             try {
                 latch.await();
@@ -86,9 +83,7 @@ public class MongoRetriever {
     }
 
     private List<Document> buildBatch(MongoCursor<Document> cursor) {
-        logger.info("Hello from buildBatch!");
         List<Document> currentBatch = new ArrayList<>(this.opts.getBatchSize());
-        logger.info("Instantiated ArrayList :)");
 
         while (cursor.hasNext() && currentBatch.size() < this.opts.getBatchSize()) {
             currentBatch.add(cursor.next()); // yield return cursor.next() :(

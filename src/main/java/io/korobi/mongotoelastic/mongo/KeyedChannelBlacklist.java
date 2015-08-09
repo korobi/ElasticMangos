@@ -16,7 +16,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class KeyedChannelBlacklist implements IChannelBlacklist {
 
     private MongoDatabase database;

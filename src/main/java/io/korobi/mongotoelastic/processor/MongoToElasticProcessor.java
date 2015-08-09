@@ -62,12 +62,16 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
                 e.printStackTrace();
             }
         }
+        if (bulkRequest.numberOfActions() == 0) {
+            return;
+        }
+
         BulkResponse bulkResponse = bulkRequest.execute().actionGet();
         if (bulkResponse.hasFailures()) {
             logger.error("Bulk response failure! (this is bad) " + bulkResponse.getItems()[0].getFailureMessage());
             throw new ImportException(bulkResponse.getItems()[0].getFailureMessage());
         } else {
-            logger.info(String.format("%d docs were imported.", documents.size()));
+            logger.info(String.format("%d docs were processed.", documents.size()));
         }
     }
 }

@@ -14,10 +14,10 @@ public class CmdLineOptions implements IOptions {
     private String mongoDb;
 
     @Option(name = "--batch-size", usage = "How many documents we grab out of the database at once.")
-    private int batchSize = 1000;
+    private int batchSize = 10000;
 
     @Option(name = "--thread-cap", usage = "Maximum number of threads we should have running at the same time.")
-    private int threadCap = 4;
+    private int threadCap = 8;
 
     @Option(name = "--es-host", usage = "ElasticSearch host for transport client.")
     private String esHost = "127.0.0.1";
