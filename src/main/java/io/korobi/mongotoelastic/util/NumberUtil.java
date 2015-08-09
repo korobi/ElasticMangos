@@ -1,4 +1,4 @@
-package io.korobi.utils;
+package io.korobi.mongotoelastic.util;
 
 public class NumberUtil {
 

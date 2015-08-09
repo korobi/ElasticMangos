@@ -1,4 +1,4 @@
-package io.korobi.opts;
+package io.korobi.mongotoelastic.opt;
 
 import org.kohsuke.args4j.Option;
 
@@ -28,36 +28,44 @@ public class CmdLineOptions implements IOptions {
     @Option(name = "--reconfigure-indexes", usage = "Whether to drop and reconfigure all indexes.")
     private boolean reconfigureIndexes = false;
 
+    @Override
     public String getMongoServerHost() {
-        return mongoHost;
+        return this.mongoHost;
     }
 
+    @Override
     public int getMongoServerPort() {
-        return mongoPort;
+        return this.mongoPort;
     }
 
+    @Override
     public String getMongoDatabase() {
-        return mongoDb;
+        return this.mongoDb;
     }
 
+    @Override
     public int getBatchSize() {
-        return batchSize;
+        return this.batchSize;
     }
 
+    @Override
     public int getThreadCap() {
-        return threadCap;
+        return this.threadCap;
     }
 
+    @Override
     public String getElasticSearchHost() {
-        return esHost;
+        return this.esHost;
     }
 
+    @Override
     public int getElasticSearchPort() {
-        return esPort;
+        return this.esPort;
     }
 
+    @Override
     public boolean getWillReconfigureIndexes() {
-        return reconfigureIndexes;
+        return this.reconfigureIndexes;
     }
 
 }

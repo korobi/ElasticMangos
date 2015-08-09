@@ -1,18 +1,19 @@
-package io.korobi;
+package io.korobi.mongotoelastic;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.mongodb.MongoClient;
-import io.korobi.elasticsearch.ElasticSearchModule;
-import io.korobi.elasticsearch.IndexInitialiser;
-import io.korobi.exceptions.ConnectionException;
-import io.korobi.mongo.KeyedChannelBlacklist;
-import io.korobi.mongo.MongoModule;
-import io.korobi.mongo.MongoRetriever;
-import io.korobi.opts.CmdLineOptions;
-import io.korobi.opts.IOptions;
-import io.korobi.opts.OptionsModule;
-import io.korobi.processor.ProcessorModule;
+import io.korobi.mongotoelastic.elasticsearch.ElasticSearchModule;
+import io.korobi.mongotoelastic.elasticsearch.IndexInitialiser;
+import io.korobi.mongotoelastic.exception.ConnectionException;
+import io.korobi.mongotoelastic.logging.LoggingModule;
+import io.korobi.mongotoelastic.mongo.KeyedChannelBlacklist;
+import io.korobi.mongotoelastic.mongo.MongoModule;
+import io.korobi.mongotoelastic.mongo.MongoRetriever;
+import io.korobi.mongotoelastic.opt.CmdLineOptions;
+import io.korobi.mongotoelastic.opt.IOptions;
+import io.korobi.mongotoelastic.opt.OptionsModule;
+import io.korobi.mongotoelastic.processor.ProcessorModule;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -27,28 +28,27 @@ public class MongoToElastic {
     private Injector injector;
 
     public MongoToElastic(String[] args) {
-        CmdLineOptions opts = handleCommandLineArgs(args);
+        CmdLineOptions opts = this.handleCommandLineArgs(args);
         if (opts == null) {
             System.exit(-1);
         }
 
-        setupInjector(opts);
-        checkConnectedToEs();
+        this.setupInjector(opts);
+        this.checkConnectedToEs();
         if (opts.getWillReconfigureIndexes()) {
-            reconfigureIndexes();
+            this.reconfigureIndexes();
             System.out.println("Hit any key to continue...");
             (new Scanner(System.in)).nextLine();
         }
-        injector.getInstance(KeyedChannelBlacklist.class);
-        System.exit(-1);
+        this.injector.getInstance(KeyedChannelBlacklist.class);
 
-        beginProcessing();
-        addShutdownHook();
-        cleanupClients();
+        this.beginProcessing();
+        this.addShutdownHook();
+        this.cleanupClients();
     }
 
     private void checkConnectedToEs() {
-        TransportClient client = (TransportClient) injector.getInstance(Client.class);
+        TransportClient client = (TransportClient) this.injector.getInstance(Client.class);
         ImmutableList<DiscoveryNode> nodes = client.connectedNodes();
         if (nodes.isEmpty()) {
             Exception e = new ConnectionException("Verify ES is running!");
@@ -58,24 +58,26 @@ public class MongoToElastic {
     }
 
     private void reconfigureIndexes() {
-        injector.getInstance(IndexInitialiser.class).initialise();
+        this.injector.getInstance(IndexInitialiser.class).initialise();
     }
 
     private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
             public void run() {
-                cleanupClients();
+                MongoToElastic.this.cleanupClients();
             }
         });
     }
 
     private void cleanupClients() {
-        MongoClient client = injector.getInstance(MongoClient.class);
+        MongoClient client = this.injector.getInstance(MongoClient.class);
         client.close();
     }
 
     private void beginProcessing() {
-        injector.getInstance(MongoRetriever.class);
+        MongoRetriever r = this.injector.getInstance(MongoRetriever.class);
+        r.processData();
     }
 
     public CmdLineOptions handleCommandLineArgs(String[] args) {
@@ -93,7 +95,8 @@ public class MongoToElastic {
 
     private void setupInjector(IOptions opts) {
         this.injector = Guice.createInjector(
-                new ElasticSearchModule(), new ProcessorModule(), new MongoModule(), new OptionsModule(opts)
+            new ElasticSearchModule(), new ProcessorModule(), new MongoModule(), new OptionsModule(opts),
+            new LoggingModule()
         );
     }
 

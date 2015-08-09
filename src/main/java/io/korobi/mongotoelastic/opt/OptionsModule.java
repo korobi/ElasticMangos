@@ -1,4 +1,4 @@
-package io.korobi.opts;
+package io.korobi.mongotoelastic.opt;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -11,7 +11,6 @@ public class OptionsModule extends AbstractModule {
     public OptionsModule(IOptions cmdLineOptions) {
         this.cmdLineOptions = cmdLineOptions;
     }
-
 
     @Singleton
     @Provides

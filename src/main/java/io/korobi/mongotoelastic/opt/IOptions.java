@@ -1,4 +1,4 @@
-package io.korobi.opts;
+package io.korobi.mongotoelastic.opt;
 
 public interface IOptions {
 
