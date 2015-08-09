@@ -6,6 +6,7 @@ import com.mongodb.MongoClient;
 import io.korobi.mongotoelastic.elasticsearch.ElasticSearchModule;
 import io.korobi.mongotoelastic.elasticsearch.IndexInitialiser;
 import io.korobi.mongotoelastic.exception.ConnectionException;
+import io.korobi.mongotoelastic.logging.LoggingModule;
 import io.korobi.mongotoelastic.mongo.KeyedChannelBlacklist;
 import io.korobi.mongotoelastic.mongo.MongoModule;
 import io.korobi.mongotoelastic.mongo.MongoRetriever;
@@ -40,7 +41,6 @@ public class MongoToElastic {
             (new Scanner(System.in)).nextLine();
         }
         this.injector.getInstance(KeyedChannelBlacklist.class);
-        System.exit(-1);
 
         this.beginProcessing();
         this.addShutdownHook();
@@ -76,7 +76,8 @@ public class MongoToElastic {
     }
 
     private void beginProcessing() {
-        this.injector.getInstance(MongoRetriever.class);
+        MongoRetriever r = this.injector.getInstance(MongoRetriever.class);
+        r.processData();
     }
 
     public CmdLineOptions handleCommandLineArgs(String[] args) {
@@ -94,7 +95,8 @@ public class MongoToElastic {
 
     private void setupInjector(IOptions opts) {
         this.injector = Guice.createInjector(
-            new ElasticSearchModule(), new ProcessorModule(), new MongoModule(), new OptionsModule(opts)
+            new ElasticSearchModule(), new ProcessorModule(), new MongoModule(), new OptionsModule(opts),
+            new LoggingModule()
         );
     }
 

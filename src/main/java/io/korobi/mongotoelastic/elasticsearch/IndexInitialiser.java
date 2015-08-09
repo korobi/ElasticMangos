@@ -1,5 +1,6 @@
 package io.korobi.mongotoelastic.elasticsearch;
 
+import io.korobi.mongotoelastic.logging.InjectLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
@@ -15,7 +16,8 @@ import javax.inject.Inject;
 
 public class IndexInitialiser {
 
-    private static final Logger logger = LogManager.getLogger();
+    @InjectLogger
+    private Logger logger;
     private final Client esClient;
 
     @Inject

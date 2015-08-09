@@ -10,15 +10,13 @@ import io.korobi.mongotoelastic.opt.IOptions;
 import io.korobi.mongotoelastic.processor.IDocumentProcessor;
 import io.korobi.mongotoelastic.processor.RunnableProcessor;
 import io.korobi.mongotoelastic.util.NumberUtil;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-
-import javax.inject.Inject;
 
 public class MongoRetriever {
 
@@ -36,9 +34,6 @@ public class MongoRetriever {
         this.processor = processor;
 
         this.checkUserThreadParameters();
-
-        // MongoClient & MongoDatabase are thread safe :)
-        this.processData();
     }
 
     private void checkUserThreadParameters() {
@@ -49,8 +44,11 @@ public class MongoRetriever {
         this.itemsPerThread = (int) itemsPerThread;
     }
 
-    private void processData() {
+    public void processData() {
         MongoCollection<Document> collection = this.database.getCollection("chats");
+        if (logger == null) {
+            throw new RuntimeException("Logger was null :(");
+        }
         logger.info("There are " + String.valueOf(collection.count()) + " chats!");
 
         List<Document> currentBatch;

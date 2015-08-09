@@ -1,6 +1,6 @@
 package io.korobi.mongotoelastic.processor;
 
-import org.apache.logging.log4j.LogManager;
+import io.korobi.mongotoelastic.logging.InjectLogger;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -9,15 +9,15 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import javax.inject.Inject;
-
 public class MongoToElasticProcessor implements IDocumentProcessor {
 
-    private static Logger logger = LogManager.getLogger();
+    @InjectLogger
+    private Logger logger;
     private Client esClient;
 
     @Inject
