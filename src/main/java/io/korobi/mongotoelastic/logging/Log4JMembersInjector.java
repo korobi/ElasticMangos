@@ -17,9 +17,8 @@ public class Log4JMembersInjector<T> implements MembersInjector<T> {
     }
 
     public void injectMembers(T t) {
-        System.out.println("Injecting into " + field.getName() + (logger == null));
         try {
-            field.set(t, logger);
+            this.field.set(t, logger);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
