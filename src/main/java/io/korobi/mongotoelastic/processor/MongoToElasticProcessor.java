@@ -76,6 +76,7 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
 
             if(i >= bulkSize) {
                 processBulkRequest(bulkRequest);
+                bulkRequest = this.esClient.prepareBulk();
                 i = 0;
             }
 
