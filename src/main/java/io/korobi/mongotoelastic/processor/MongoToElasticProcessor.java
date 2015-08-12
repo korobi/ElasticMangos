@@ -19,28 +19,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MongoToElasticProcessor implements IDocumentProcessor {
 
-    private static final AtomicInteger batchNo = new AtomicInteger();
-
     @InjectLogger
     private Logger logger;
-    private Client esClient;
-    private IChannelBlacklist blacklist;
+    private final Client esClient;
+    private final IChannelBlacklist blacklist;
+    private final AtomicInteger batchNo;
 
     @Inject
     public MongoToElasticProcessor(Client esClient, IChannelBlacklist blacklist) {
         this.esClient = esClient;
         this.blacklist = blacklist;
+        this.batchNo = new AtomicInteger();
     }
 
     @Override
     public void run(MongoCursor<Document> documents, int bulkSize) {
         BulkRequestBuilder bulkRequest = this.esClient.prepareBulk();
         Document doc;
+        int i = 0;
+        int count = 0;
 
         synchronized(documents) {
             doc = documents.tryNext();
         }
-        int i = 0;
         while(doc != null) {
             if (this.blacklist.isBlacklisted(doc.getString("network"), doc.getString("channel"))) {
                 synchronized(documents) {
@@ -70,6 +71,7 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
                         .endObject();
                 bulkRequest.add(this.esClient.prepareIndex("chats", "chat").setSource(docBuilder));
                 ++i;
+                ++count;
             } catch (IOException e) {
                 logger.error(e);
             }
@@ -86,6 +88,7 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
         }
 
         processBulkRequest(bulkRequest);
+        logger.info("Thread '{}' imported {} documents.", Thread.currentThread().getName(), count);
     }
 
     private void processBulkRequest(BulkRequestBuilder bulkRequest) {
