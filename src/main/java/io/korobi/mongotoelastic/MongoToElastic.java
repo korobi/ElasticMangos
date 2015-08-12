@@ -38,8 +38,10 @@ public class MongoToElastic {
         this.checkConnectedToEs();
         if (opts.getWillReconfigureIndexes()) {
             this.reconfigureIndexes();
-            System.out.println("Hit any key to continue...");
-            (new Scanner(System.in)).nextLine();
+            if (!Boolean.getBoolean("mongotoelastic.no-wait")) {
+                System.out.println("Hit any key to continue...");
+                (new Scanner(System.in)).nextLine();
+            }
         }
         this.injector.getInstance(KeyedChannelBlacklist.class);
 
