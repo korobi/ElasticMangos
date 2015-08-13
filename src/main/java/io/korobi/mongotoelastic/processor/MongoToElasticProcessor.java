@@ -38,6 +38,7 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
         Document doc;
         int i = 0;
         int count = 0;
+        int blCount = 0;
 
         synchronized(documents) {
             doc = documents.tryNext();
@@ -72,12 +73,13 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
                 bulkRequest.add(this.esClient.prepareIndex("chats", "chat").setSource(docBuilder));
                 ++i;
                 ++count;
+                ++blCount;
             } catch (IOException e) {
                 logger.error(e);
             }
 
             if(i >= bulkSize) {
-                processBulkRequest(bulkRequest);
+                processBulkRequest(bulkRequest, blCount);
                 bulkRequest = this.esClient.prepareBulk();
                 i = 0;
             }
@@ -87,11 +89,11 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
             }
         }
 
-        processBulkRequest(bulkRequest);
+        processBulkRequest(bulkRequest, blCount);
         logger.info("Thread '{}' imported {} documents.", Thread.currentThread().getName(), count);
     }
 
-    private void processBulkRequest(BulkRequestBuilder bulkRequest) {
+    private void processBulkRequest(BulkRequestBuilder bulkRequest, int blCount) {
         if (bulkRequest.numberOfActions() == 0) {
             return;
         }
@@ -104,7 +106,7 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
             logger.error("Bulk response failure! (this is bad) Request: {}, message: {}", currentNo, bulkResponse.getItems()[0].getFailureMessage());
             throw new ImportException(bulkResponse.getItems()[0].getFailureMessage());
         } else {
-            logger.info("{} docs were processed by request {}.", bulkRequest.numberOfActions(), currentNo);
+            logger.info("{} docs were processed by request {} with blCount of {}.", bulkRequest.numberOfActions(), currentNo, blCount);
         }
     }
 
