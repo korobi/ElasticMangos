@@ -48,6 +48,7 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
                 synchronized(documents) {
                     doc = documents.tryNext();
                 }
+                ++blCount;
                 continue;
             }
 
@@ -73,7 +74,6 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
                 bulkRequest.add(this.esClient.prepareIndex("chats", "chat").setSource(docBuilder));
                 ++i;
                 ++count;
-                ++blCount;
             } catch (IOException e) {
                 logger.error(e);
             }
