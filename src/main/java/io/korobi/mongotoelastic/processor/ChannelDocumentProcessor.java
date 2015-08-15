@@ -51,9 +51,9 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
 
             try {
                 XContentBuilder builder = buildDocument(doc);
-                logger.info(builder.prettyPrint().string());
-                bulkRequest.add(this.esClient.prepareIndex("channels", "channel").setSource(builder));
-                (new Scanner(System.in)).nextLine();
+                if (builder != null) {
+                    bulkRequest.add(this.esClient.prepareIndex("channels", "channel").setSource(builder));
+                }
             } catch (IOException e) {
                 logger.error(e);
             }
@@ -83,13 +83,17 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
 
         Date lastValidContentAt = doc.getDate("last_valid_content_at");
         Date lastActivity = doc.getDate("last_activity");
+        if (lastActivity == null || lastValidContentAt == null) {
+            logger.warn("Refusing to index channel ({} on {}) with no activity.", doc.get("channel"), doc.get("network"));
+            return null;
+        }
         return XContentFactory.jsonBuilder()
                 .startObject()
                     .field("mongoId", doc.get("_id").toString())
                     .field("channel", doc.getString("channel"))
                     .field("network", doc.getString("network"))
                     .field("last_valid_content_at", lastValidContentAt.getTime())
-                    .field("last_activity", lastActivity.getTime())
+                .field("last_activity", lastActivity.getTime())
                     .startObject("topic")
                         .field("actor_host", doc.get("topic", Document.class).getString("actor_host"))
                         .field("actor_nick", doc.get("topic", Document.class).getString("actor_nick"))
