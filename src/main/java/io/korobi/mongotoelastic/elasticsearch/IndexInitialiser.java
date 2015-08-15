@@ -80,6 +80,12 @@ public class IndexInitialiser {
                                 .startObject("last_valid_content_at")
                                     .field("type", "long")
                                 .endObject()
+                                .startObject("_name_suggest")
+                                    .field("payloads", true)
+                                    .field("index_analyzer", "simple")
+                                    .field("search_analyzer", "simple")
+                                    .field("type", "completion")
+                                .endObject()
                             .endObject()
                         .endObject()
                     .endObject();

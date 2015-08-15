@@ -87,18 +87,29 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
             logger.warn("Refusing to index channel ({} on {}) with no activity.", doc.get("channel"), doc.get("network"));
             return null;
         }
+        String channel = doc.getString("channel");
+        String network = doc.getString("network");
+        String mongoId = doc.get("_id").toString();
         return XContentFactory.jsonBuilder()
                 .startObject()
-                    .field("mongoId", doc.get("_id").toString())
-                    .field("channel", doc.getString("channel"))
-                    .field("network", doc.getString("network"))
+                    .field("mongoId", mongoId)
+                    .field("channel", channel)
+                    .field("network", network)
                     .field("last_valid_content_at", lastValidContentAt.getTime())
-                .field("last_activity", lastActivity.getTime())
+                    .field("last_activity", lastActivity.getTime())
                     .startObject("topic")
                         .field("actor_host", doc.get("topic", Document.class).getString("actor_host"))
                         .field("actor_nick", doc.get("topic", Document.class).getString("actor_nick"))
                         .field("time", doc.get("topic", Document.class).getDate("time").getTime())
                         .field("value", doc.get("topic", Document.class).getString("value"))
+                    .endObject()
+                    .startObject("_name_suggest")
+                        .array("input", channel, String.format("%s:%s", network, channel))
+                        .startObject("payload")
+                            .field("network", network)
+                            .field("channel", channel)
+                            .field("mongoId", mongoId)
+                        .endObject()
                     .endObject()
                 .endObject();
     }
