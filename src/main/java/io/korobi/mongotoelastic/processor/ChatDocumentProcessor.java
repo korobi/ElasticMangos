@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MongoToElasticProcessor implements IDocumentProcessor {
+public class ChatDocumentProcessor implements IDocumentProcessor {
 
     @InjectLogger
     private Logger logger;
@@ -26,7 +26,7 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
     private final AtomicInteger batchNo;
 
     @Inject
-    public MongoToElasticProcessor(Client esClient, IChannelBlacklist blacklist) {
+    public ChatDocumentProcessor(Client esClient, IChannelBlacklist blacklist) {
         this.esClient = esClient;
         this.blacklist = blacklist;
         this.batchNo = new AtomicInteger();
@@ -61,7 +61,6 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
                             .field("actor_name", doc.getString("actor_name"))
                             .field("actor_prefix", doc.getString("actor_prefix"))
                             .field("channel", doc.getString("channel"))
-                            // .field("channel_mode", doc.getString("channel_mode")) // TODO: Check w/ kashike
                             .field("message", doc.getString("message"))
                             .field("network", doc.getString("network"))
                             .field("recipient_hostname", doc.getString("recipient_hostname"))
@@ -90,7 +89,7 @@ public class MongoToElasticProcessor implements IDocumentProcessor {
         }
 
         processBulkRequest(bulkRequest, blCount);
-        logger.info("Thread '{}' imported {} documents.", Thread.currentThread().getName(), count);
+        logger.info("Thread '{}' imported {} chat documents.", Thread.currentThread().getName(), count);
     }
 
     private void processBulkRequest(BulkRequestBuilder bulkRequest, int blCount) {

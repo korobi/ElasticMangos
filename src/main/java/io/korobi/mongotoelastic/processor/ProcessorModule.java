@@ -6,6 +6,6 @@ public class ProcessorModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        this.bind(IDocumentProcessor.class).to(MongoToElasticProcessor.class);
+        this.bind(IDocumentProcessor.class).to(ChatDocumentProcessor.class);
     }
 }
