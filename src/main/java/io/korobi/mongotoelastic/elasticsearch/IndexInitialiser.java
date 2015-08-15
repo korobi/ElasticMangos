@@ -1,7 +1,6 @@
 package io.korobi.mongotoelastic.elasticsearch;
 
 import io.korobi.mongotoelastic.logging.InjectLogger;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
@@ -27,12 +26,22 @@ public class IndexInitialiser {
 
     public void initialise() {
         IndicesAdminClient indices = this.esClient.admin().indices();
-        DeleteIndexRequestBuilder deleteBuilder = new DeleteIndexRequestBuilder(indices, "chats");
-        indices.delete(deleteBuilder.request());
+        removeIndices(indices);
         logger.info("Indexes removed.");
 
+        createIndices(indices);
+        logger.info("Created indices!");
+    }
+
+    private void createIndices(IndicesAdminClient indices) {
+        createChatsIndex(indices);
+        createChannelsIndex(indices);
+    }
+
+    private void createChatsIndex(IndicesAdminClient indices) {
         CreateIndexRequest createBuilder = new CreateIndexRequest("chats");
         try {
+            // @formatter:off
             XContentBuilder mappingBuilder = XContentFactory.jsonBuilder()
                 .startObject()
                     .startObject("chat")
@@ -44,11 +53,46 @@ public class IndexInitialiser {
                     .endObject()
                 .endObject();
             createBuilder.mapping("chat", mappingBuilder);
+            // @formatter:on
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        logger.info("Created index!");
         indices.create(createBuilder);
+    }
+
+    private void createChannelsIndex(IndicesAdminClient indices) {
+        CreateIndexRequest createBuilder = new CreateIndexRequest("channels");
+        try {
+            // @formatter:off
+            XContentBuilder mappingBuilder = XContentFactory.jsonBuilder()
+                    .startObject()
+                        .startObject("channel")
+                            .startObject("properties")
+                                .startObject("topic")
+                                    .field("type", "object") // we only have one so don't use type 'nested'
+                                .endObject()
+                                .startObject("topic.time")
+                                    .field("type", "long")
+                                .endObject()
+                                .startObject("last_activity")
+                                    .field("type", "long")
+                                .endObject()
+                                .startObject("last_valid_content_at")
+                    .field("type", "long")
+                                .endObject()
+                            .endObject()
+                        .endObject()
+                    .endObject();
+            createBuilder.mapping("channel", mappingBuilder);
+            // @formatter:on
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        indices.create(createBuilder);
+    }
+
+    private void removeIndices(IndicesAdminClient indices) {
+        DeleteIndexRequestBuilder deleteBuilder = new DeleteIndexRequestBuilder(indices, "chats");
+        indices.delete(deleteBuilder.request());
     }
 }
