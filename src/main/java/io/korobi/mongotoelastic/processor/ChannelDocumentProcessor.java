@@ -39,11 +39,11 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
     @Override
     public void run(MongoCursor<Document> documents) {
         // We don't have enough channels to necessitate processing in a multithreaded manner
+        BulkRequestBuilder bulkRequest = this.esClient.prepareBulk();
         while (documents.hasNext()) {
             Document doc = documents.next();
             String network = doc.getString("network");
             String channel = doc.getString("channel");
-            logger.info("ORIGINAL: " + doc.toJson());
             if (this.blacklist.isBlacklisted(network, channel)) {
                 logger.info(String.format("Skipping channel %s on network %s due to blacklist.", channel, network));
                 continue;
@@ -52,11 +52,27 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
             try {
                 XContentBuilder builder = buildDocument(doc);
                 logger.info(builder.prettyPrint().string());
-                logger.info("You *must* press a key");
+                bulkRequest.add(this.esClient.prepareIndex("channels", "channel").setSource(builder));
                 (new Scanner(System.in)).nextLine();
             } catch (IOException e) {
                 logger.error(e);
             }
+        }
+        logger.info("Submitting BR for {} channels", bulkRequest.numberOfActions());
+        processBulkRequest(bulkRequest);
+    }
+
+    private void processBulkRequest(BulkRequestBuilder bulkRequest) {
+        if (bulkRequest.numberOfActions() == 0) {
+            return;
+        }
+
+        BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+        if (bulkResponse.hasFailures()) {
+            logger.error("Bulk response failure! (this is bad!) Message: {}", bulkResponse.getItems()[0].getFailureMessage());
+            throw new ImportException(bulkResponse.getItems()[0].getFailureMessage());
+        } else {
+            logger.info("{} channels were processed by the bulk request.", bulkRequest.numberOfActions());
         }
     }
 
@@ -67,17 +83,18 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
 
         Date lastValidContentAt = doc.getDate("last_valid_content_at");
         Date lastActivity = doc.getDate("last_activity");
-        logger.info(doc.get("topic"));
         return XContentFactory.jsonBuilder()
                 .startObject()
                     .field("mongoId", doc.get("_id").toString())
                     .field("channel", doc.getString("channel"))
                     .field("network", doc.getString("network"))
-                    .field("network", doc.getString("network"))
                     .field("last_valid_content_at", lastValidContentAt.getTime())
                     .field("last_activity", lastActivity.getTime())
                     .startObject("topic")
-                        .field("actor_host", doc.getString("topic.actor_host")) // ??
+                        .field("actor_host", doc.get("topic", Document.class).getString("actor_host"))
+                        .field("actor_nick", doc.get("topic", Document.class).getString("actor_nick"))
+                        .field("time", doc.get("topic", Document.class).getDate("time").getTime())
+                        .field("value", doc.get("topic", Document.class).getString("value"))
                     .endObject()
                 .endObject();
     }
