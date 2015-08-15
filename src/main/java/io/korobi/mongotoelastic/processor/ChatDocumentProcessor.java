@@ -53,7 +53,7 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
             }
 
             try {
-                Date date = (Date) doc.get("date");
+                Date date = doc.getDate("date");
                 XContentBuilder docBuilder =
                     XContentFactory.jsonBuilder()
                         .startObject()

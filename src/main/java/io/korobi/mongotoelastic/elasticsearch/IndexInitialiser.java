@@ -92,7 +92,9 @@ public class IndexInitialiser {
     }
 
     private void removeIndices(IndicesAdminClient indices) {
-        DeleteIndexRequestBuilder deleteBuilder = new DeleteIndexRequestBuilder(indices, "chats");
-        indices.delete(deleteBuilder.request());
+        DeleteIndexRequestBuilder chatsDeleteBuilder = new DeleteIndexRequestBuilder(indices, "chats");
+        DeleteIndexRequestBuilder channelsDeleteBuilder = new DeleteIndexRequestBuilder(indices, "channels");
+        indices.delete(chatsDeleteBuilder.request());
+        indices.delete(channelsDeleteBuilder.request());
     }
 }
