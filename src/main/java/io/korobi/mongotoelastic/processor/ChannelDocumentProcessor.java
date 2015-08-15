@@ -15,6 +15,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChannelDocumentProcessor implements IDocumentProcessor {
@@ -32,18 +33,27 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
 
     @Override
     public void run(MongoCursor<Document> documents, int bulkSize) {
+        throw new UnsupportedOperationException("No support for multithreaded channel import");
+    }
+
+    @Override
+    public void run(MongoCursor<Document> documents) {
         // We don't have enough channels to necessitate processing in a multithreaded manner
         while (documents.hasNext()) {
             Document doc = documents.next();
             String network = doc.getString("network");
             String channel = doc.getString("channel");
+            logger.info("ORIGINAL: " + doc.toJson());
             if (this.blacklist.isBlacklisted(network, channel)) {
                 logger.info(String.format("Skipping channel %s on network %s due to blacklist.", channel, network));
                 continue;
             }
 
             try {
-                buildDocument(doc);
+                XContentBuilder builder = buildDocument(doc);
+                logger.info(builder.prettyPrint().string());
+                logger.info("You *must* press a key");
+                (new Scanner(System.in)).nextLine();
             } catch (IOException e) {
                 logger.error(e);
             }
@@ -57,7 +67,7 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
 
         Date lastValidContentAt = doc.getDate("last_valid_content_at");
         Date lastActivity = doc.getDate("last_activity");
-
+        logger.info(doc.get("topic"));
         return XContentFactory.jsonBuilder()
                 .startObject()
                     .field("mongoId", doc.get("_id").toString())
@@ -67,7 +77,7 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
                     .field("last_valid_content_at", lastValidContentAt.getTime())
                     .field("last_activity", lastActivity.getTime())
                     .startObject("topic")
-                        // TODO: doc.getString("topic.actor_host") ??
+                        .field("actor_host", doc.getString("topic.actor_host")) // ??
                     .endObject()
                 .endObject();
     }

@@ -92,6 +92,11 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
         logger.info("Thread '{}' imported {} chat documents.", Thread.currentThread().getName(), count);
     }
 
+    @Override
+    public void run(MongoCursor<Document> documents) {
+        throw new UnsupportedOperationException("No support for singlethreaded channel import");
+    }
+
     private void processBulkRequest(BulkRequestBuilder bulkRequest, int blCount) {
         if (bulkRequest.numberOfActions() == 0) {
             return;

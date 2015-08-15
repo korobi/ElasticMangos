@@ -6,6 +6,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import io.korobi.mongotoelastic.logging.InjectLogger;
 import io.korobi.mongotoelastic.opt.IOptions;
+import io.korobi.mongotoelastic.processor.ChatDocumentProcessor;
 import io.korobi.mongotoelastic.processor.IDocumentProcessor;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
@@ -14,7 +15,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MongoRetriever {
+public class MongoChatRetriever {
 
     @InjectLogger
     private Logger logger;
@@ -26,7 +27,7 @@ public class MongoRetriever {
     private final List<Thread> threadPool;
 
     @Inject
-    public MongoRetriever(MongoDatabase database, IOptions opts, IDocumentProcessor processor) {
+    public MongoChatRetriever(MongoDatabase database, IOptions opts, ChatDocumentProcessor processor) {
         this.database = database;
         this.opts = opts;
         this.processor = processor;

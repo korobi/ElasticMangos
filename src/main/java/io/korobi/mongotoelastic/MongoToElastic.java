@@ -8,8 +8,9 @@ import io.korobi.mongotoelastic.elasticsearch.IndexInitialiser;
 import io.korobi.mongotoelastic.exception.ConnectionException;
 import io.korobi.mongotoelastic.logging.LoggingModule;
 import io.korobi.mongotoelastic.mongo.KeyedChannelBlacklist;
+import io.korobi.mongotoelastic.mongo.MongoChannelRetriever;
 import io.korobi.mongotoelastic.mongo.MongoModule;
-import io.korobi.mongotoelastic.mongo.MongoRetriever;
+import io.korobi.mongotoelastic.mongo.MongoChatRetriever;
 import io.korobi.mongotoelastic.opt.CmdLineOptions;
 import io.korobi.mongotoelastic.opt.IOptions;
 import io.korobi.mongotoelastic.opt.OptionsModule;
@@ -79,8 +80,10 @@ public class MongoToElastic {
     }
 
     private void beginProcessing() {
-        MongoRetriever r = this.injector.getInstance(MongoRetriever.class);
-        r.processData();
+        MongoChannelRetriever channelRetriever = this.injector.getInstance(MongoChannelRetriever.class);
+        channelRetriever.processData();
+        MongoChatRetriever chatRetriever = this.injector.getInstance(MongoChatRetriever.class);
+        chatRetriever.processData();
     }
 
     public CmdLineOptions handleCommandLineArgs(String[] args) {
