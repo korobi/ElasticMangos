@@ -78,7 +78,7 @@ public class IndexInitialiser {
                                     .field("type", "long")
                                 .endObject()
                                 .startObject("last_valid_content_at")
-                    .field("type", "long")
+                                    .field("type", "long")
                                 .endObject()
                             .endObject()
                         .endObject()
