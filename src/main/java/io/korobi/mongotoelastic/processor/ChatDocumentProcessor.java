@@ -70,7 +70,7 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
                             .field("mongoId", doc.get("_id").toString())
                             .field("date", date.getTime())
                         .endObject();
-                bulkRequest.add(this.esClient.prepareIndex("chats", "chat").setSource(docBuilder));
+                bulkRequest.add(this.esClient.prepareIndex("chats", "chat").setSource(docBuilder).setId(doc.getObjectId("_id").toHexString()));
                 ++i;
                 ++count;
             } catch (IOException e) {
