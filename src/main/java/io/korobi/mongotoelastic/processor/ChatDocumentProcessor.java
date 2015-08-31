@@ -1,11 +1,17 @@
 package io.korobi.mongotoelastic.processor;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import io.korobi.mongotoelastic.exception.ImportException;
+import io.korobi.mongotoelastic.exception.WtfIsGoingOnException;
 import io.korobi.mongotoelastic.logging.InjectLogger;
 import io.korobi.mongotoelastic.mongo.IChannelBlacklist;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.Client;
@@ -23,12 +29,14 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
     private Logger logger;
     private final Client esClient;
     private final IChannelBlacklist blacklist;
+    private final MongoDatabase database;
     private final AtomicInteger batchNo;
 
     @Inject
-    public ChatDocumentProcessor(Client esClient, IChannelBlacklist blacklist) {
+    public ChatDocumentProcessor(Client esClient, IChannelBlacklist blacklist, MongoDatabase database) {
         this.esClient = esClient;
         this.blacklist = blacklist;
+        this.database = database;
         this.batchNo = new AtomicInteger();
     }
 
@@ -67,6 +75,7 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
                             .field("recipient_name", doc.getString("recipient_name"))
                             .field("recipient_prefix", doc.getString("recipient_prefix"))
                             .field("type", doc.getString("type"))
+                            .field("channel_object_id", getChannelObjectIdForDocument(doc))
                             .field("mongoId", doc.get("_id").toString())
                             .field("date", date.getTime())
                         .endObject();
@@ -90,6 +99,16 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
 
         processBulkRequest(bulkRequest, blCount);
         logger.info("Thread '{}' imported {} chat documents.", Thread.currentThread().getName(), count);
+    }
+
+    private String getChannelObjectIdForDocument(Document doc) {
+        BasicDBObject query = new BasicDBObject("channel", doc.get("channel"));
+        query.append("network", doc.get("network"));
+        Document item = database.getCollection("channels").find(query).first();
+        if (item == null) {
+            throw new WtfIsGoingOnException(String.format("Chat with no channel: %s %s %s", doc.getString("channel"), doc.getString("network"), doc.getObjectId("_id").toHexString()));
+        }
+        return item.getObjectId("_id").toHexString();
     }
 
     @Override
