@@ -95,6 +95,7 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
                     .field("mongoId", mongoId)
                     .field("channel", channel)
                     .field("network", network)
+                    .field("added_at", doc.getObjectId("_id").getDate().getTime())
                     .field("last_valid_content_at", lastValidContentAt.getTime())
                     .field("last_activity", lastActivity.getTime())
                     .startObject("topic")
