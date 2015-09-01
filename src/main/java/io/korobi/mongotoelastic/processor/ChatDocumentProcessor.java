@@ -61,6 +61,9 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
                 final String channelObjectIdForDocument = getChannelObjectIdForDocument(doc);
                 if (channelObjectIdForDocument == null) {
                     logger.warn("Skipping chat from non-existent channel " + doc.getString("channel") + " on network " + doc.getString("network"));
+                    synchronized(documents) {
+                        doc = documents.tryNext();
+                    }
                     continue;
                 }
 
