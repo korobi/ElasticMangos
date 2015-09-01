@@ -124,14 +124,15 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
             return cachedValue.get();
         }
 
-        BasicDBObject query = new BasicDBObject("channel", doc.get("channel"));
-
+        BasicDBObject query = new BasicDBObject("channel", providedChannel);
         query.append("network", providedNetwork);
+
         Document item = database.getCollection("channels").find(query).first();
         if (item == null) {
             return null; // some channels don't exist (they've been imported).
         }
         final String result = item.getObjectId("_id").toHexString();
+        logger.info(String.format("Yay found a channel id from the DB: %s", result));
         chanIdLookup.provideChannelId(result, providedNetwork, providedChannel);
         return result;
     }
