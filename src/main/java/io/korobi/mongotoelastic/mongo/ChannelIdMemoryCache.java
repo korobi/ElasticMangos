@@ -8,7 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class ChannelIdMemoryCache implements IChannelIdLookup {
 
-    private Map<String, Map<String, String>> cache = new ConcurrentHashMap<>(10);
+    public static final int NETWORK_CAPACITY = 10;
+    public static final int CHANNEL_CAPACITY = 40;
+
+    private final Map<String, Map<String, String>> cache = new ConcurrentHashMap<>(NETWORK_CAPACITY);
 
     @Override
     public Optional<String> getChannelObjectId(String network, String channel) {
@@ -26,7 +29,7 @@ public class ChannelIdMemoryCache implements IChannelIdLookup {
                    { channel, objectId }
                };
             */
-            ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>(40);
+            ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>(CHANNEL_CAPACITY);
             map.put(channel, objectId);
             cache.put(network, map);
         }
