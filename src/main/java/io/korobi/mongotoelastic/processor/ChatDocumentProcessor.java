@@ -1,17 +1,13 @@
 package io.korobi.mongotoelastic.processor;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import io.korobi.mongotoelastic.exception.ImportException;
-import io.korobi.mongotoelastic.exception.WtfIsGoingOnException;
 import io.korobi.mongotoelastic.logging.InjectLogger;
 import io.korobi.mongotoelastic.mongo.IChannelBlacklist;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.Client;
@@ -62,6 +58,12 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
 
             try {
                 Date date = doc.getDate("date");
+                final String channelObjectIdForDocument = getChannelObjectIdForDocument(doc);
+                if (channelObjectIdForDocument == null) {
+                    logger.warn("Skipping chat from non-existent channel " + doc.getString("channel") + " on network " + doc.getString("network"));
+                    continue;
+                }
+
                 XContentBuilder docBuilder =
                     XContentFactory.jsonBuilder()
                         .startObject()
@@ -75,7 +77,7 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
                             .field("recipient_name", doc.getString("recipient_name"))
                             .field("recipient_prefix", doc.getString("recipient_prefix"))
                             .field("type", doc.getString("type"))
-                            .field("channel_object_id", getChannelObjectIdForDocument(doc))
+                            .field("channel_object_id", channelObjectIdForDocument)
                             .field("mongoId", doc.get("_id").toString())
                             .field("date", date.getTime())
                         .endObject();
@@ -110,7 +112,7 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
         query.append("network", doc.get("network"));
         Document item = database.getCollection("channels").find(query).first();
         if (item == null) {
-            throw new WtfIsGoingOnException(String.format("Chat with no channel: %s %s %s", doc.getString("channel"), doc.getString("network"), doc.getObjectId("_id").toHexString()));
+            return null; // some channels don't exist (they've been imported).
         }
         return item.getObjectId("_id").toHexString();
     }
