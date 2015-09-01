@@ -6,6 +6,13 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
+/**
+ * In-memory map of channel object IDs so we don't have to hit Mongo
+ * for every chat in order to look them up.
+ *
+ * Note this instance will be shared amongst many threads and should
+ * be thread-safe.
+ */
 public class ChannelIdMemoryCache implements IChannelIdLookup {
 
     public static final int NETWORK_CAPACITY = 10;
