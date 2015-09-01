@@ -15,10 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChannelIdMemoryCache implements IChannelIdLookup {
 
-    public static final int NETWORK_CAPACITY = 10;
-    public static final int CHANNEL_CAPACITY = 40;
+    public static final int INITIAL_NETWORK_CAPACITY = 10;
+    public static final int INITIAL_CHANNEL_CAPACITY = 50;
 
-    private final Map<String, Map<String, String>> cache = new ConcurrentHashMap<>(NETWORK_CAPACITY);
+    private final Map<String, Map<String, String>> cache = new ConcurrentHashMap<>(INITIAL_NETWORK_CAPACITY);
 
     @Override
     public Optional<String> getChannelObjectId(String network, String channel) {
@@ -36,7 +36,7 @@ public class ChannelIdMemoryCache implements IChannelIdLookup {
                    { channel, objectId }
                };
             */
-            ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>(CHANNEL_CAPACITY);
+            ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>(INITIAL_CHANNEL_CAPACITY);
             map.put(channel, objectId);
             cache.put(network, map);
         }
