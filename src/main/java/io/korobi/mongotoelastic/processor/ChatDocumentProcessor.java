@@ -6,6 +6,7 @@ import com.mongodb.client.MongoDatabase;
 import io.korobi.mongotoelastic.exception.ImportException;
 import io.korobi.mongotoelastic.logging.InjectLogger;
 import io.korobi.mongotoelastic.mongo.IChannelBlacklist;
+import io.korobi.mongotoelastic.mongo.IChannelIdLookup;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -17,6 +18,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChatDocumentProcessor implements IDocumentProcessor {
@@ -26,13 +28,15 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
     private final Client esClient;
     private final IChannelBlacklist blacklist;
     private final MongoDatabase database;
+    private final IChannelIdLookup chanIdLookup;
     private final AtomicInteger batchNo;
 
     @Inject
-    public ChatDocumentProcessor(Client esClient, IChannelBlacklist blacklist, MongoDatabase database) {
+    public ChatDocumentProcessor(Client esClient, IChannelBlacklist blacklist, MongoDatabase database, IChannelIdLookup chanIdLookup) {
         this.esClient = esClient;
         this.blacklist = blacklist;
         this.database = database;
+        this.chanIdLookup = chanIdLookup;
         this.batchNo = new AtomicInteger();
     }
 
@@ -107,17 +111,29 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
     }
 
     private String getChannelObjectIdForDocument(Document doc) {
+
         if (doc.containsKey("channel_object_id")) {
             return doc.getObjectId("channel_object_id").toHexString();
         }
 
+        final String providedNetwork = doc.getString("network");
+        final String providedChannel = doc.getString("channel");
+
+        final Optional<String> cachedValue = chanIdLookup.getChannelObjectId(providedNetwork, providedChannel);
+        if (cachedValue.isPresent()) {
+            return cachedValue.get();
+        }
+
         BasicDBObject query = new BasicDBObject("channel", doc.get("channel"));
-        query.append("network", doc.get("network"));
+
+        query.append("network", providedNetwork);
         Document item = database.getCollection("channels").find(query).first();
         if (item == null) {
             return null; // some channels don't exist (they've been imported).
         }
-        return item.getObjectId("_id").toHexString();
+        final String result = item.getObjectId("_id").toHexString();
+        chanIdLookup.provideChannelId(result, providedNetwork, providedChannel);
+        return result;
     }
 
     @Override
