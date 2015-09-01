@@ -22,6 +22,9 @@ public class ChannelIdMemoryCache implements IChannelIdLookup {
 
     @Override
     public Optional<String> getChannelObjectId(String network, String channel) {
+        if (cache.containsKey(network)) {
+            return Optional.ofNullable(cache.get(network).get(channel));
+        }
         return Optional.empty();
     }
 
