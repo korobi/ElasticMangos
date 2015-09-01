@@ -105,7 +105,7 @@ public class ChatDocumentProcessor implements IDocumentProcessor {
 
     private String getChannelObjectIdForDocument(Document doc) {
         if (doc.containsKey("channel_object_id")) {
-            return doc.getString("channel_object_id");
+            return doc.getObjectId("channel_object_id").toHexString();
         }
 
         BasicDBObject query = new BasicDBObject("channel", doc.get("channel"));
