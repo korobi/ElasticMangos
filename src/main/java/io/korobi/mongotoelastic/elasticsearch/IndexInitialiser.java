@@ -71,6 +71,10 @@ public class IndexInitialiser {
                                 .startObject("topic")
                                     .field("type", "object") // we only have one so don't use type 'nested'
                                 .endObject()
+                                .startObject("type")
+                                    .field("type", "string")
+                                    .field("index", "not_analyzed")
+                                .endObject()
                                 .startObject("topic.time")
                                     .field("type", "long")
                                 .endObject()
