@@ -72,7 +72,7 @@ public class IndexInitialiser {
                     .startObject()
                         .startObject("channel")
                             .startObject("properties")
-                    .startObject("topic")
+                                .startObject("topic")
                                     .field("type", "object") // we only have one so don't use type 'nested'
                                 .endObject()
                                 .startObject("topic.time")
