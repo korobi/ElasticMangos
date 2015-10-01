@@ -84,7 +84,7 @@ public class IndexInitialiser {
                                 .startObject("added_at")
                                     .field("type", "long")
                                 .endObject()
-                                .startObject("last_valid_content_at")
+                                .startObject("last_activity_valid") // was last_valid_content_at
                                     .field("type", "long")
                                 .endObject()
                                 .startObject("_name_suggest")

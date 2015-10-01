@@ -81,7 +81,7 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
         // ideally need to reindex the channel object every time someone
         // joins/parts/quits.
 
-        Date lastValidContentAt = doc.getDate("last_valid_content_at");
+        Date lastValidContentAt = doc.getDate("last_activity_valid");
         Date lastActivity = doc.getDate("last_activity");
         if (lastActivity == null || lastValidContentAt == null) {
             logger.warn("Refusing to index channel ({} on {}) with no activity.", doc.get("channel"), doc.get("network"));
@@ -96,7 +96,7 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
                     .field("channel", channel)
                     .field("network", network)
                     .field("added_at", doc.getObjectId("_id").getDate().getTime())
-                    .field("last_valid_content_at", lastValidContentAt.getTime())
+                    .field("last_activity_valid", lastValidContentAt.getTime())
                     .field("last_activity", lastActivity.getTime())
                     .startObject("topic")
                         .field("actor_host", doc.get("topic", Document.class).getString("actor_host"))
