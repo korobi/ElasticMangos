@@ -9,8 +9,8 @@ import io.korobi.mongotoelastic.exception.ConnectionException;
 import io.korobi.mongotoelastic.logging.LoggingModule;
 import io.korobi.mongotoelastic.mongo.KeyedChannelBlacklist;
 import io.korobi.mongotoelastic.mongo.MongoChannelRetriever;
-import io.korobi.mongotoelastic.mongo.MongoModule;
 import io.korobi.mongotoelastic.mongo.MongoChatRetriever;
+import io.korobi.mongotoelastic.mongo.MongoModule;
 import io.korobi.mongotoelastic.opt.CmdLineOptions;
 import io.korobi.mongotoelastic.opt.IOptions;
 import io.korobi.mongotoelastic.opt.OptionsModule;
@@ -18,10 +18,10 @@ import io.korobi.mongotoelastic.processor.ProcessorModule;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.node.DiscoveryNode;
-import org.elasticsearch.common.collect.ImmutableList;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class MongoToElastic {
@@ -53,7 +53,7 @@ public class MongoToElastic {
 
     private void checkConnectedToEs() {
         TransportClient client = (TransportClient) this.injector.getInstance(Client.class);
-        ImmutableList<DiscoveryNode> nodes = client.connectedNodes();
+        List<DiscoveryNode> nodes = client.connectedNodes();
         if (nodes.isEmpty()) {
             Exception e = new ConnectionException("Verify ES is running!");
             e.printStackTrace();

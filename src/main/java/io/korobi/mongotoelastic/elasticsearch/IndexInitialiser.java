@@ -3,15 +3,15 @@ package io.korobi.mongotoelastic.elasticsearch;
 import io.korobi.mongotoelastic.logging.InjectLogger;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexAction;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
+import java.io.IOException;
 
 public class IndexInitialiser {
 
@@ -105,8 +105,8 @@ public class IndexInitialiser {
     }
 
     private void removeIndices(IndicesAdminClient indices) {
-        DeleteIndexRequestBuilder chatsDeleteBuilder = new DeleteIndexRequestBuilder(indices, "chats");
-        DeleteIndexRequestBuilder channelsDeleteBuilder = new DeleteIndexRequestBuilder(indices, "channels");
+        DeleteIndexRequestBuilder chatsDeleteBuilder = new DeleteIndexRequestBuilder(this.esClient, DeleteIndexAction.INSTANCE, "chats");
+        DeleteIndexRequestBuilder channelsDeleteBuilder = new DeleteIndexRequestBuilder(indices, DeleteIndexAction.INSTANCE, "channels");
         indices.delete(chatsDeleteBuilder.request());
         indices.delete(channelsDeleteBuilder.request());
     }
