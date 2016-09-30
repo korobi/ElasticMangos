@@ -105,7 +105,7 @@ public class IndexInitialiser {
     }
 
     private void removeIndices(IndicesAdminClient indices) {
-        DeleteIndexRequestBuilder chatsDeleteBuilder = new DeleteIndexRequestBuilder(this.esClient, DeleteIndexAction.INSTANCE, "chats");
+        DeleteIndexRequestBuilder chatsDeleteBuilder = new DeleteIndexRequestBuilder(indices, DeleteIndexAction.INSTANCE, "chats");
         DeleteIndexRequestBuilder channelsDeleteBuilder = new DeleteIndexRequestBuilder(indices, DeleteIndexAction.INSTANCE, "channels");
         indices.delete(chatsDeleteBuilder.request());
         indices.delete(channelsDeleteBuilder.request());
