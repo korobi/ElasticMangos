@@ -23,4 +23,4 @@ Usage
 
 To (re)create the necessary indices and import all data from a MongoDB instance, run the following command:
 
-`java -Xmx4G -jar target/mongotoelastic-1.0.0-SNAPSHOT.jar --mongo-db "korobi" --reconfigure-indexes`
+`java -Xmx4G -jar target/mongotoelastic-1.1.0-SNAPSHOT.jar --mongo-db "korobi" --reconfigure-indexes`
