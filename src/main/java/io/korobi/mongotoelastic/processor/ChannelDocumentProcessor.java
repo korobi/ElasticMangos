@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -52,7 +53,10 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
             try {
                 XContentBuilder builder = buildDocument(doc);
                 if (builder != null) {
-                    bulkRequest.add(this.esClient.prepareIndex("channels", "channel").setSource(builder));
+                    IndexRequestBuilder boohoo_zarthusLikedTheFirstRunOfEM = this.esClient.prepareIndex("channels", "channel")
+                        .setId(doc.getObjectId("_id").toHexString())
+                        .setSource(builder);
+                    bulkRequest.add(boohoo_zarthusLikedTheFirstRunOfEM);
                 }
             } catch (IOException e) {
                 logger.error(e);
