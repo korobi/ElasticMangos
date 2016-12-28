@@ -90,29 +90,42 @@ public class ChannelDocumentProcessor implements IDocumentProcessor {
         String channel = doc.getString("channel");
         String network = doc.getString("network");
         String mongoId = doc.get("_id").toString();
-        return XContentFactory.jsonBuilder()
-                .startObject()
-                    .field("mongoId", mongoId)
-                    .field("channel", channel)
-                    .field("network", network)
-                    .field("added_at", doc.getObjectId("_id").getDate().getTime())
-                    .field("last_activity_valid", lastValidContentAt.getTime())
-                    .field("last_activity", lastActivity.getTime())
-                    .startObject("topic")
-                        .field("actor_host", doc.get("topic", Document.class).getString("actor_host"))
-                        .field("actor_nick", doc.get("topic", Document.class).getString("actor_nick"))
-                        .field("time", doc.get("topic", Document.class).getDate("time").getTime())
-                        .field("value", doc.get("topic", Document.class).getString("value"))
+
+        XContentBuilder builder = XContentFactory.jsonBuilder()
+            .startObject()
+                .field("mongoId", mongoId)
+                .field("channel", channel)
+                .field("network", network)
+                .field("added_at", doc.getObjectId("_id").getDate().getTime())
+                .field("last_activity_valid", lastValidContentAt.getTime())
+                .field("last_activity", lastActivity.getTime());
+                this.appendTopic(builder, doc.get("topic", Document.class));
+                builder.startObject("_name_suggest")
+                    .array("input", channel, String.format("%s:%s", network, channel))
+                    .startObject("payload")
+                        .field("network", network)
+                        .field("channel", channel)
+                        .field("mongoId", mongoId)
                     .endObject()
-                    .startObject("_name_suggest")
-                        .array("input", channel, String.format("%s:%s", network, channel))
-                        .startObject("payload")
-                            .field("network", network)
-                            .field("channel", channel)
-                            .field("mongoId", mongoId)
-                        .endObject()
                     .endObject()
+            .endObject();
+
+        return builder;
+    }
+
+    private void appendTopic(XContentBuilder builder, Document topic) throws IOException {
+        String host = topic.getString("actor_host");
+        String nick = topic.getString("actor_nick");
+        Date time = topic.getDate("time");
+        String value = topic.getString("value");
+        if (host != null && nick != null && time != null && value != null) {
+            builder.startObject("topic")
+                .field("actor_host", host)
+                .field("actor_nick", nick)
+                .field("time", time.getTime())
+                .field("value", value)
                 .endObject();
+        }
     }
 
 }
