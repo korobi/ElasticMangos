@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 import io.korobi.mongotoelastic.opt.IOptions;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
 import javax.inject.Singleton;
@@ -18,7 +19,12 @@ public class ElasticSearchModule extends AbstractModule {
     public Client provideClient(IOptions opts) {
         // http://elasticsearch-users.115913.n3.nabble.com/Is-NodeClient-thread-safe-td2816264.html
 
-        TransportClient client = TransportClient.builder().build();
+        Settings settings = Settings.settingsBuilder()
+            .put("cluster.name", "korobi")
+            .build();
+        TransportClient client = TransportClient.builder()
+            .settings(settings)
+            .build();
         try {
             client = client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(opts.getElasticSearchHost()), opts.getElasticSearchPort()));
         } catch (UnknownHostException e) {
